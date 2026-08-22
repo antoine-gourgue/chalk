@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
+/**
+ * Chalk — jetons de design, direction « salle obscure ».
+ * Le fond n'est jamais noir pur : un violet très sombre, comme une salle éclairée
+ * aux LED. Les trois couleurs vives ont chacune un seul emploi — c'est cette
+ * discipline qui empêche l'écran de virer à la fête foraine.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --void: #060310;
+  --night: #0b0616;
+  --raise: #140b26;
+  --edge: rgba(255, 255, 255, 0.1);
+  --edge-soft: rgba(255, 255, 255, 0.06);
+
+  --white: #ffffff;
+  --dim: rgba(255, 255, 255, 0.62);
+  --faint: rgba(255, 255, 255, 0.38);
+
+  --violet: #8b5cf6;
+  --pink: #ff2e88;
+  --cyan: #22d3ee;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-void: var(--void);
+  --color-night: var(--night);
+  --color-raise: var(--raise);
+  --color-edge: var(--edge);
+  --color-edge-soft: var(--edge-soft);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-chalk: var(--white);
+  --color-chalk-dim: var(--dim);
+  --color-chalk-faint: var(--faint);
+
+  /** Emplois réservés : violet = marque et interactif, rose = urgence et tête de
+   * classement, cyan = données (reps, charges, Rx, record). */
+  --color-brand: var(--violet);
+  --color-urgent: var(--pink);
+  --color-data: var(--cyan);
+
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--void);
+  color: var(--white);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/** Chronos, scores et charges : aucun tressautement quand les chiffres défilent. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/** Le dégradé de marque, réservé à la marque, à l'anneau du chrono et au bouton principal. */
+.brand-gradient {
+  background: linear-gradient(96deg, var(--pink), var(--violet) 55%, var(--cyan));
 }

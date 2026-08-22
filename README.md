@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chalk
 
-## Getting Started
+**La séance au mur, en direct.**
 
-First, run the development server:
+Le logiciel d'une salle de sport, en trois surfaces : le coach programme la semaine, les membres
+réservent leur créneau et notent leurs perfs, et l'écran accroché au mur de la salle affiche la
+séance du jour, le chrono et le classement du créneau en temps réel.
+
+## Démarrer
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env      # puis renseigner DATABASE_URL et AUTH_SECRET
+npm install
+npm run db:up             # PostgreSQL local
+npm run db:migrate
+npm run dev:all           # Next.js + passerelle temps réel
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script              | Rôle                                 |
+| ------------------- | ------------------------------------ |
+| `npm run dev:all`   | App et passerelle socket.io ensemble |
+| `npm run lint`      | ESLint                               |
+| `npm run typecheck` | `tsc --noEmit`                       |
+| `npm run test`      | vitest                               |
+| `npm run format`    | Prettier sur tout le dépôt           |
+| `npm run db:studio` | Prisma Studio                        |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture
 
-## Learn More
+- `src/app` — App Router : le mur, l'app coach, l'app membre
+- `src/lib` — logique métier partagée (dont le calcul du chrono)
+- `realtime/` — passerelle socket.io : état des chronos et classements en direct
+- `prisma/` — schéma et migrations
+- `docs/` — planche d'identité et directions visuelles
 
-To learn more about Next.js, take a look at the following resources:
+Le chrono n'est jamais diffusé seconde par seconde : le serveur envoie l'instant de départ, chaque
+écran calcule le reste. C'est ce qui garantit que le mur et les téléphones affichent la même seconde.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Déploiement
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Image Docker multi-étages (`runner`, `realtime`, `migrator`), poussée sur
+`ghcr.io/antoine-gourgue/chalk` par GitHub Actions, servie derrière nginx sur
+`chalk.antoinegourgue.dev`.

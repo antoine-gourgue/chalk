@@ -1,0 +1,1265 @@
+<title>Chalk en salle obscure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+/>
+
+<style>
+  :root {
+    --void: #060310;
+    --night: #0b0616;
+    --raise: #140b26;
+    --edge: rgba(255, 255, 255, 0.1);
+    --edge-soft: rgba(255, 255, 255, 0.06);
+
+    --white: #ffffff;
+    --dim: rgba(255, 255, 255, 0.62);
+    --faint: rgba(255, 255, 255, 0.38);
+
+    --violet: #8b5cf6;
+    --pink: #ff2e88;
+    --cyan: #22d3ee;
+
+    --sans: Outfit, ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--void);
+    color: var(--white);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(70% 50% at 15% 0%, rgba(139, 92, 246, 0.2), transparent 70%),
+      radial-gradient(50% 40% at 90% 10%, rgba(255, 46, 136, 0.12), transparent 70%);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  section {
+    padding: 68px 0;
+    border-top: 1px solid var(--edge-soft);
+  }
+  section:first-of-type {
+    border-top: 0;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 14px;
+  }
+
+  h2 {
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 8px;
+    letter-spacing: -0.005em;
+  }
+
+  p {
+    margin: 0 0 14px;
+    max-width: 62ch;
+    color: var(--dim);
+  }
+  p strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .grad {
+    background: linear-gradient(96deg, var(--pink), var(--violet) 55%, var(--cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .note {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--faint);
+    line-height: 1.7;
+    margin-top: 14px;
+    max-width: 70ch;
+  }
+
+  /* ---------------- Hero ---------------- */
+  .hero {
+    padding: 90px 0 68px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 44px;
+    align-items: center;
+  }
+  .hero-mark {
+    width: 132px;
+    height: 132px;
+    flex: none;
+  }
+  .wordmark {
+    font-weight: 900;
+    font-size: clamp(58px, 11vw, 128px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    margin: 0;
+  }
+  .tagline {
+    font-weight: 600;
+    font-size: clamp(17px, 2.2vw, 23px);
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin: 10px 0 16px;
+  }
+
+  /* ---------------- Marque ---------------- */
+  .marks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+    margin-top: 28px;
+  }
+  .mark-card {
+    border: 1px solid var(--edge);
+    border-radius: 18px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.035);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .mark-stage {
+    min-height: 132px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+  }
+  .mark-stage.on-dark {
+    background: var(--night);
+  }
+  .mark-stage.on-light {
+    background: #f4f4f6;
+  }
+  .mark-stage.on-pink {
+    background: linear-gradient(120deg, var(--pink), var(--violet));
+  }
+  .mark-card p {
+    font-size: 13.5px;
+    margin: 0;
+  }
+
+  /* ---------------- Palette ---------------- */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+    gap: 12px;
+    margin-top: 26px;
+  }
+  .swatch {
+    border: 1px solid var(--edge);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .swatch .chip {
+    height: 72px;
+  }
+  .swatch .info {
+    padding: 12px 14px 14px;
+  }
+  .swatch .name {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .swatch .hex {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .swatch .role {
+    font-size: 12px;
+    color: var(--faint);
+    margin-top: 5px;
+    line-height: 1.45;
+  }
+
+  /* ---------------- Typo ---------------- */
+  .type-row {
+    display: grid;
+    grid-template-columns: 168px minmax(0, 1fr);
+    gap: 28px;
+    padding: 26px 0;
+    border-top: 1px solid var(--edge-soft);
+    align-items: start;
+  }
+  .type-row:first-of-type {
+    border-top: 0;
+  }
+  .type-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--faint);
+    line-height: 1.6;
+  }
+  .type-label b {
+    display: block;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-family: var(--sans);
+  }
+  .spec-big {
+    font-weight: 900;
+    font-size: clamp(38px, 6.6vw, 74px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin: 0;
+  }
+  .spec-body {
+    font-size: 18px;
+    color: var(--white);
+    margin: 0;
+    font-weight: 400;
+  }
+  .spec-mono {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: clamp(26px, 4vw, 40px);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+
+  /* ---------------- Le mur ---------------- */
+  .screen {
+    container-type: inline-size;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--edge);
+    margin-top: 26px;
+  }
+  .nx {
+    height: 100%;
+    background: radial-gradient(120% 90% at 50% 0%, #241243 0%, #0b0616 60%, #060310 100%);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .nx-top {
+    display: flex;
+    align-items: center;
+    gap: 1.4cqw;
+    padding: 2cqw 3cqw 0;
+    font-size: 1.15cqw;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+  }
+  .nx-top .brand {
+    color: var(--white);
+    letter-spacing: 0.02em;
+    font-weight: 800;
+    text-transform: none;
+    font-size: 1.5cqw;
+  }
+  .nx-top .live {
+    margin-left: auto;
+    color: var(--pink);
+    display: flex;
+    align-items: center;
+    gap: 0.6cqw;
+  }
+  .nx-top .live i {
+    width: 0.75cqw;
+    height: 0.75cqw;
+    border-radius: 50%;
+    background: var(--pink);
+    box-shadow: 0 0 1.2cqw var(--pink);
+    animation: beat 2s ease-in-out infinite;
+  }
+  @keyframes beat {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .nx-body {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2cqw;
+    padding: 1cqw 3cqw 2.6cqw;
+    min-height: 0;
+  }
+  .nx-wod h3 {
+    font-weight: 900;
+    font-size: 4.6cqw;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.4cqw;
+  }
+  .nx-mv {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75cqw;
+  }
+  .nx-mv li {
+    display: flex;
+    align-items: center;
+    gap: 1cqw;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid var(--edge);
+    border-radius: 99px;
+    padding: 0.75cqw 1.3cqw;
+    font-size: 1.55cqw;
+    font-weight: 600;
+  }
+  .nx-mv b {
+    font-weight: 800;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+  }
+  .nx-mv span {
+    margin-left: auto;
+    font-size: 1.15cqw;
+    font-weight: 500;
+    color: var(--faint);
+  }
+
+  .nx-ring {
+    width: 26cqw;
+    height: 26cqw;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(
+      from 180deg,
+      var(--pink) 0deg,
+      var(--violet) 130deg,
+      var(--cyan) 231deg,
+      rgba(255, 255, 255, 0.07) 231deg 360deg
+    );
+  }
+  .nx-ring .in {
+    width: calc(100% - 2.2cqw);
+    height: calc(100% - 2.2cqw);
+    border-radius: 50%;
+    background: #0a0518;
+    display: grid;
+    place-content: center;
+    text-align: center;
+  }
+  .nx-ring .lbl {
+    font-size: 1.05cqw;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+  }
+  .nx-ring .val {
+    font-weight: 800;
+    font-size: 7cqw;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+
+  .nx-board {
+    display: grid;
+    gap: 0.7cqw;
+  }
+  .nx-board .row {
+    display: flex;
+    align-items: center;
+    gap: 1cqw;
+    padding: 0.85cqw 1.2cqw;
+    border-radius: 1cqw;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--edge-soft);
+    font-size: 1.4cqw;
+    font-weight: 600;
+  }
+  .nx-board .row.first {
+    background: linear-gradient(90deg, rgba(255, 46, 136, 0.28), rgba(139, 92, 246, 0.18));
+    border-color: rgba(255, 46, 136, 0.5);
+  }
+  .nx-board .p {
+    font-size: 1.1cqw;
+    color: var(--faint);
+    width: 1.6cqw;
+    font-variant-numeric: tabular-nums;
+  }
+  .nx-board .s {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+  .nx-board .tag {
+    font-size: 0.9cqw;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.15cqw 0.6cqw;
+    border-radius: 99px;
+  }
+  .nx-board .tag.rx {
+    background: rgba(34, 211, 238, 0.2);
+    color: var(--cyan);
+  }
+  .nx-board .tag.sc {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--dim);
+  }
+
+  /* ---------------- App coach ---------------- */
+  .app {
+    border: 1px solid var(--edge);
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--raise), var(--night));
+    overflow: hidden;
+    margin-top: 26px;
+  }
+  .app-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--edge-soft);
+    font-size: 13px;
+    color: var(--faint);
+  }
+  .app-bar .brand {
+    font-weight: 800;
+    color: var(--white);
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+  .app-bar nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 10px;
+  }
+  .app-bar nav span {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .app-bar nav span.on {
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--white);
+  }
+  .app-bar .who {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--dim);
+  }
+  .avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(130deg, var(--pink), var(--violet));
+  }
+
+  .week {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--edge-soft);
+  }
+  .day {
+    background: var(--night);
+    padding: 16px 16px 20px;
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .day header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .day .dname {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+  }
+  .day .dnum {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--faint);
+  }
+  .day.today {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.16), rgba(11, 6, 22, 0.2));
+  }
+  .day.today .dname {
+    color: var(--violet);
+  }
+
+  .blk {
+    border-radius: 12px;
+    border: 1px solid var(--edge-soft);
+    background: rgba(255, 255, 255, 0.045);
+    padding: 10px 12px;
+  }
+  .blk .kind {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 700;
+  }
+  .blk .name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 3px;
+    letter-spacing: -0.01em;
+  }
+  .blk .meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--faint);
+    margin-top: 5px;
+  }
+  .blk.metcon .kind {
+    color: var(--pink);
+  }
+  .day .add {
+    margin-top: auto;
+    border: 1px dashed var(--edge);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--faint);
+  }
+
+  /* ---------------- App membre ---------------- */
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 260px));
+    gap: 26px;
+    margin-top: 26px;
+    justify-content: start;
+  }
+  .phone {
+    border: 1px solid var(--edge);
+    border-radius: 30px;
+    padding: 12px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  }
+  .phone-in {
+    border-radius: 22px;
+    background: radial-gradient(120% 60% at 50% 0%, #241243 0%, #0b0616 65%);
+    padding: 20px 16px 22px;
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .ph-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--faint);
+  }
+  .ph-h {
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0;
+  }
+  .ph-sub {
+    font-size: 13px;
+    color: var(--dim);
+    margin: 0;
+  }
+
+  .slot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--edge-soft);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.045);
+  }
+  .slot .h {
+    font-weight: 700;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .slot .c {
+    font-size: 12px;
+    color: var(--faint);
+  }
+  .slot.sel {
+    background: linear-gradient(100deg, rgba(255, 46, 136, 0.26), rgba(139, 92, 246, 0.2));
+    border-color: rgba(255, 46, 136, 0.45);
+  }
+  .slot.full {
+    opacity: 0.55;
+  }
+  .slot .pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: rgba(34, 211, 238, 0.16);
+    color: var(--cyan);
+  }
+  .slot.full .pill {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--dim);
+  }
+
+  .cta {
+    margin-top: auto;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 99px;
+    background: linear-gradient(100deg, var(--pink), var(--violet));
+    box-shadow: 0 8px 30px -10px rgba(255, 46, 136, 0.7);
+  }
+
+  .score-ring {
+    display: grid;
+    place-items: center;
+    padding: 6px 0 2px;
+  }
+  .score-ring .circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 180deg,
+      var(--cyan),
+      var(--violet) 200deg,
+      rgba(255, 255, 255, 0.08) 200deg 360deg
+    );
+    display: grid;
+    place-items: center;
+  }
+  .score-ring .circle .in {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: #0a0518;
+    display: grid;
+    place-content: center;
+    text-align: center;
+  }
+  .score-ring .v {
+    font-weight: 800;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-ring .u {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--faint);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .pr-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 9px 0;
+    border-top: 1px solid var(--edge-soft);
+  }
+  .pr-line .up {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+  .pr-line .m {
+    font-family: var(--mono);
+    color: var(--faint);
+    font-size: 12px;
+  }
+
+  /* ---------------- Règles ---------------- */
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 26px;
+  }
+  .rule {
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.035);
+  }
+  .rule h3 {
+    color: var(--white);
+  }
+  .rule p {
+    font-size: 13.5px;
+    margin: 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--edge-soft);
+    padding: 30px 0 60px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--faint);
+    letter-spacing: 0.04em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-top .live i {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 26px;
+    }
+    .hero-mark {
+      width: 92px;
+      height: 92px;
+    }
+    .type-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+    .week {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<div class="wrap">
+  <section class="hero">
+    <svg class="hero-mark" viewBox="0 0 64 64" fill="none" aria-label="Marque Chalk">
+      <defs>
+        <linearGradient id="g1" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#ff2e88"></stop>
+          <stop offset="0.55" stop-color="#8b5cf6"></stop>
+          <stop offset="1" stop-color="#22d3ee"></stop>
+        </linearGradient>
+      </defs>
+      <path
+        d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+        stroke="url(#g1)"
+        stroke-width="8"
+        stroke-linecap="round"
+      ></path>
+      <circle cx="46.14" cy="15.15" r="4.6" fill="#22d3ee"></circle>
+    </svg>
+    <div>
+      <p class="eyebrow">Direction retenue · Salle obscure</p>
+      <h1 class="wordmark grad">Chalk</h1>
+      <p class="tagline">La séance au mur, en direct.</p>
+      <p>
+        Lumière basse, musique forte, un anneau de chrono qui se vide au centre de la pièce. Le
+        produit est fait pour être vu de loin pendant l'effort — l'interface s'éteint, il ne reste
+        que le mouvement, le temps et le classement.
+      </p>
+      <p class="note">chalk.antoinegourgue.dev</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">01 — Marque</p>
+    <h2>Un C qui est un chrono</h2>
+    <p>
+      L'anneau du compte à rebours, ouvert sur la droite, dessine un C. La tête du chrono est un
+      point cyan. <strong>Le symbole du produit est son mécanisme</strong> : le même anneau se
+      retrouve au centre du mur et autour du record sur le téléphone.
+    </p>
+
+    <div class="marks">
+      <div class="mark-card">
+        <div class="mark-stage on-dark">
+          <svg
+            width="88"
+            height="88"
+            viewBox="0 0 64 64"
+            fill="none"
+            aria-label="Marque en dégradé"
+          >
+            <path
+              d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+              stroke="url(#g1)"
+              stroke-width="8"
+              stroke-linecap="round"
+            ></path>
+            <circle cx="46.14" cy="15.15" r="4.6" fill="#22d3ee"></circle>
+          </svg>
+        </div>
+        <h3>Version principale</h3>
+        <p>Sur fond sombre, dégradé rose → violet → cyan.</p>
+      </div>
+
+      <div class="mark-card">
+        <div class="mark-stage on-light">
+          <svg
+            width="88"
+            height="88"
+            viewBox="0 0 64 64"
+            fill="none"
+            aria-label="Marque monochrome sombre"
+          >
+            <path
+              d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+              stroke="#140b26"
+              stroke-width="8"
+              stroke-linecap="round"
+            ></path>
+            <circle cx="46.14" cy="15.15" r="4.6" fill="#8b5cf6"></circle>
+          </svg>
+        </div>
+        <h3>Sur fond clair</h3>
+        <p>Facture, e-mail, document imprimé : tracé plein, un seul point de couleur.</p>
+      </div>
+
+      <div class="mark-card">
+        <div class="mark-stage on-pink">
+          <svg
+            width="88"
+            height="88"
+            viewBox="0 0 64 64"
+            fill="none"
+            aria-label="Marque en réserve"
+          >
+            <path
+              d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+              stroke="#ffffff"
+              stroke-width="8"
+              stroke-linecap="round"
+            ></path>
+            <circle cx="46.14" cy="15.15" r="4.6" fill="#ffffff"></circle>
+          </svg>
+        </div>
+        <h3>En réserve</h3>
+        <p>Blanc plein sur aplat de marque, quand le fond fait déjà le travail.</p>
+      </div>
+
+      <div class="mark-card">
+        <div class="mark-stage on-dark" style="gap: 18px; display: flex">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 64 64"
+            fill="none"
+            aria-label="Marque en favicon"
+          >
+            <path
+              d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+              stroke="url(#g1)"
+              stroke-width="11"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 64 64"
+            fill="none"
+            aria-label="Marque en très petit format"
+          >
+            <path
+              d="M46.14 15.15 A22 22 0 1 0 46.14 48.85"
+              stroke="#ffffff"
+              stroke-width="13"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+        </div>
+        <h3>Petits formats</h3>
+        <p>Le tracé s'épaissit et le point disparaît sous 24 px — la forme tient seule.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">02 — Couleur</p>
+    <h2>Trois lumières sur un noir violacé</h2>
+    <p>
+      Le fond n'est jamais noir pur : c'est un <strong>violet très sombre</strong>, comme une salle
+      éclairée par des LED. Les trois couleurs vives ne sont pas interchangeables — chacune a un
+      seul emploi, et cette discipline est ce qui empêche l'écran de virer à la fête foraine.
+    </p>
+
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background: #060310"></div>
+        <div class="info">
+          <div class="name">Nuit</div>
+          <div class="hex">#060310</div>
+          <div class="role">Fond général</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #0b0616"></div>
+        <div class="info">
+          <div class="name">Nuit haute</div>
+          <div class="hex">#0B0616</div>
+          <div class="role">Écrans, cartes pleines</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #140b26"></div>
+        <div class="info">
+          <div class="name">Violet profond</div>
+          <div class="hex">#140B26</div>
+          <div class="role">Panneaux surélevés</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #ff2e88"></div>
+        <div class="info">
+          <div class="name">Rose</div>
+          <div class="hex">#FF2E88</div>
+          <div class="role">Ce qui presse : direct, tête de classement, dix dernières secondes</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #8b5cf6"></div>
+        <div class="info">
+          <div class="name">Violet</div>
+          <div class="hex">#8B5CF6</div>
+          <div class="role">La marque et tout ce qui se clique</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #22d3ee"></div>
+        <div class="info">
+          <div class="name">Cyan</div>
+          <div class="hex">#22D3EE</div>
+          <div class="role">Les données : reps, charges, Rx, record battu</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #ffffff"></div>
+        <div class="info">
+          <div class="name">Blanc</div>
+          <div class="hex">#FFFFFF</div>
+          <div class="role">Texte principal — jamais une couleur vive pour lire</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: rgba(255, 255, 255, 0.38)"></div>
+        <div class="info">
+          <div class="name">Blanc éteint</div>
+          <div class="hex">62 % · 38 %</div>
+          <div class="role">Texte secondaire et libellés</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">
+      Le dégradé rose → violet → cyan est réservé à trois usages : la marque, l'anneau du chrono, le
+      bouton principal. Partout ailleurs, aplat.
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">03 — Typographie</p>
+    <h2>Outfit, serrée</h2>
+
+    <div class="type-row">
+      <div class="type-label">
+        <b>Outfit 800–900</b>Titres, chrono, noms de séance. Géométrique et ronde : elle tient à
+        cinq mètres sans agressivité, interlettrage très serré (−0,03 em).
+      </div>
+      <p class="spec-big">AMRAP 12<br />07:42</p>
+    </div>
+
+    <div class="type-row">
+      <div class="type-label"><b>Outfit 400–600</b>Toute l'interface coach et membre.</div>
+      <p class="spec-body">
+        Mardi 18 h 30 avec Léa · 14 places sur 16 réservées<br />Trois personnes en liste d'attente
+      </p>
+    </div>
+
+    <div class="type-row">
+      <div class="type-label">
+        <b>IBM Plex Mono</b>Uniquement les colonnes de chiffres du coach et les libellés techniques.
+        Chasse fixe : rien ne tressaute quand ça défile.
+      </div>
+      <p class="spec-mono">5+14 · 43/30 kg · 96 kg</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">04 — Surface 1 sur 3</p>
+    <h2>Le mur</h2>
+    <p>
+      Écran fixe, aucune interaction, lu de loin. L'anneau se vide sur la durée du bloc et passe
+      entièrement au rose sur les dix dernières secondes.
+    </p>
+
+    <div class="screen">
+      <div class="nx">
+        <div class="nx-top">
+          <span class="brand">Chalk</span>
+          <span>Mardi 22 août · 18:30 · Léa</span>
+          <span class="live"><i></i>14 présents</span>
+        </div>
+        <div class="nx-body">
+          <div class="nx-wod">
+            <h3>AMRAP 12</h3>
+            <ul class="nx-mv">
+              <li><b>12</b> Thrusters <span>43 / 30 kg</span></li>
+              <li><b>9</b> Toes-to-bar</li>
+              <li><b>6</b> Burpees box jump <span>60 / 50 cm</span></li>
+            </ul>
+          </div>
+          <div class="nx-ring">
+            <div class="in">
+              <div class="lbl">Restant</div>
+              <div class="val">07:42</div>
+            </div>
+          </div>
+          <div class="nx-board">
+            <div class="row first">
+              <span class="p">1</span> Malik B. <span class="tag rx">RX</span
+              ><span class="s">5+14</span>
+            </div>
+            <div class="row">
+              <span class="p">2</span> Camille D. <span class="tag rx">RX</span
+              ><span class="s">5+03</span>
+            </div>
+            <div class="row">
+              <span class="p">3</span> Sonia K. <span class="tag sc">SC</span
+              ><span class="s">4+21</span>
+            </div>
+            <div class="row">
+              <span class="p">4</span> Thomas R. <span class="tag rx">RX</span
+              ><span class="s">4+09</span>
+            </div>
+            <div class="row">
+              <span class="p">5</span> Inès F. <span class="tag sc">SC</span
+              ><span class="s">3+18</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">05 — Surface 2 sur 3</p>
+    <h2>Le coach</h2>
+    <p>
+      Même palette, densité inverse : on programme au clavier, sur grand écran. Les blocs se
+      déplacent d'un jour à l'autre, une semaine se duplique en un raccourci.
+    </p>
+
+    <div class="app">
+      <div class="app-bar">
+        <span class="brand">Chalk</span>
+        <nav>
+          <span class="on">Semaine</span><span>Cours</span><span>Membres</span
+          ><span>Mouvements</span>
+        </nav>
+        <span class="who">CrossFit Ouest · Léa <span class="avatar"></span></span>
+      </div>
+      <div class="week">
+        <div class="day">
+          <header><span class="dname">Lundi</span><span class="dnum">21.08</span></header>
+          <div class="blk">
+            <div class="kind">Force</div>
+            <div class="name">Back squat</div>
+            <div class="meta">5×3 · 80 % 1RM</div>
+          </div>
+          <div class="blk metcon">
+            <div class="kind">Metcon</div>
+            <div class="name">For time · 15 min</div>
+            <div class="meta">Row · DU · Wall ball</div>
+          </div>
+        </div>
+        <div class="day today">
+          <header><span class="dname">Mardi</span><span class="dnum">22.08</span></header>
+          <div class="blk">
+            <div class="kind">Échauffement</div>
+            <div class="name">Mobilité épaules</div>
+            <div class="meta">10 min</div>
+          </div>
+          <div class="blk metcon">
+            <div class="kind">Metcon</div>
+            <div class="name">AMRAP 12</div>
+            <div class="meta">Thrusters · T2B · Burpees</div>
+          </div>
+        </div>
+        <div class="day">
+          <header><span class="dname">Mercredi</span><span class="dnum">23.08</span></header>
+          <div class="blk">
+            <div class="kind">Gym</div>
+            <div class="name">Muscle-up</div>
+            <div class="meta">Progressions · 20 min</div>
+          </div>
+          <div class="blk metcon">
+            <div class="kind">Metcon</div>
+            <div class="name">EMOM 16</div>
+            <div class="meta">4 stations</div>
+          </div>
+        </div>
+        <div class="day">
+          <header><span class="dname">Jeudi</span><span class="dnum">24.08</span></header>
+          <div class="add">Programmer la séance</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">06 — Surface 3 sur 3</p>
+    <h2>Le membre</h2>
+    <p>
+      À une main, dans les vestiaires : une seule décision par écran, et un bouton assez gros pour
+      être touché sans regarder.
+    </p>
+
+    <div class="phones">
+      <div class="phone">
+        <div class="phone-in">
+          <div class="ph-top"><span>18:04</span><span>Mardi 22.08</span></div>
+          <h3 class="ph-h">Réserver<br />ce soir</h3>
+          <p class="ph-sub">AMRAP 12 · Thrusters, T2B, burpees</p>
+          <div class="slot">
+            <div>
+              <div class="h">17:30</div>
+              <div class="c">avec Léa</div>
+            </div>
+            <span class="pill">4 places</span>
+          </div>
+          <div class="slot full">
+            <div>
+              <div class="h">18:30</div>
+              <div class="c">avec Léa</div>
+            </div>
+            <span class="pill">Complet</span>
+          </div>
+          <div class="slot sel">
+            <div>
+              <div class="h">19:30</div>
+              <div class="c">avec Malik</div>
+            </div>
+            <span class="pill">9 places</span>
+          </div>
+          <div class="cta">Réserver 19:30</div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone-in">
+          <div class="ph-top"><span>19:47</span><span>Back squat</span></div>
+          <h3 class="ph-h">Nouveau<br />record</h3>
+          <div class="score-ring">
+            <div class="circle">
+              <div class="in">
+                <div class="v">96</div>
+                <div class="u">kg · 1 RM</div>
+              </div>
+            </div>
+          </div>
+          <div class="pr-line">
+            <span class="up">+ 4 kg sur ton record</span><span class="m">1 RM</span>
+          </div>
+          <div class="pr-line"><span>Précédent · 92 kg</span><span class="m">11 mai</span></div>
+          <div class="cta">Enregistrer</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">07 — Garde-fous</p>
+    <h2>Ce qui empêche cette direction de mal tourner</h2>
+    <div class="rules">
+      <div class="rule">
+        <h3>Le halo est un accent, pas une texture</h3>
+        <p>
+          Une seule ombre colorée par écran, sur l'élément le plus important. Jamais sur du texte
+          courant.
+        </p>
+      </div>
+      <div class="rule">
+        <h3>On ne lit jamais en couleur vive</h3>
+        <p>
+          Le rose, le violet et le cyan servent aux chiffres, aux états et aux boutons. Les phrases
+          restent en blanc ou en blanc éteint.
+        </p>
+      </div>
+      <div class="rule">
+        <h3>Contraste vérifié à 4,5:1</h3>
+        <p>
+          Y compris le cyan sur violet profond et le blanc éteint sur les cartes — c'est la
+          contrainte qui décide, pas l'œil.
+        </p>
+      </div>
+      <div class="rule">
+        <h3>Le mouvement sert le chrono</h3>
+        <p>
+          L'anneau, le pouls du direct, la ligne qui remonte au classement. Rien d'autre ne bouge,
+          et tout s'arrête sous
+          <span style="font-family: var(--mono); font-size: 0.92em">prefers-reduced-motion</span>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    Chalk · direction C — salle obscure · jetons figés dans le projet le 22 août 2026
+  </footer>
+</div>

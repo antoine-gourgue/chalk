@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Prisma generated client
+/src/generated
+
+# Local env files
+.env
+.env*.local
+
+# Documentation d'agents vendue par les CLI (regénérable via skills-lock.json)
+/.agents
+/.windsurf
+/.claude/skills
+/.idea
