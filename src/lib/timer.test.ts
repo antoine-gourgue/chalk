@@ -6,6 +6,7 @@ import {
   formatClock,
   isFinalCountdown,
   isFinished,
+  justFinished,
   pauseTimer,
   progressRatio,
   remainingSeconds,
@@ -186,5 +187,32 @@ describe("formatClock", () => {
     expect(formatClock(9)).toBe("00:09");
     expect(formatClock(0)).toBe("00:00");
     expect(formatClock(3_600)).toBe("60:00");
+  });
+});
+
+describe("justFinished", () => {
+  it("annonce la fin dans les secondes qui suivent", () => {
+    const state = startTimer("block-1", 60, T0);
+    expect(justFinished(state, T0 + 60_500)).toBe(true);
+    expect(justFinished(state, T0 + 70_000)).toBe(true);
+  });
+
+  it("ne rejoue pas l'annonce longtemps après", () => {
+    const state = startTimer("block-1", 60, T0);
+    expect(justFinished(state, T0 + 3_600_000)).toBe(false);
+  });
+
+  it("tient compte du temps passé en pause", () => {
+    let state = startTimer("block-1", 60, T0);
+    state = pauseTimer(state, T0 + 30_000);
+    state = resumeTimer(state, T0 + 130_000);
+    /** Cent secondes de pause : le bloc se termine à T0 + 160 s. */
+    expect(justFinished(state, T0 + 161_000)).toBe(true);
+    expect(justFinished(state, T0 + 200_000)).toBe(false);
+  });
+
+  it("reste muet tant que le bloc tourne", () => {
+    const state = startTimer("block-1", 60, T0);
+    expect(justFinished(state, T0 + 30_000)).toBe(false);
   });
 });

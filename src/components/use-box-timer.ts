@@ -5,7 +5,7 @@ import { io, type Socket } from "socket.io-client";
 import {
   clockOffset,
   isFinalCountdown,
-  isFinished,
+  justFinished,
   leadInRemaining,
   progressRatio,
   remainingSeconds,
@@ -77,7 +77,7 @@ export function useBoxTimer(boxSlug: string): BoxTimer {
     progress: timer === null ? 0 : progressRatio(timer, now),
     finalCountdown: timer !== null && isFinalCountdown(timer, now),
     leadIn: timer === null ? 0 : leadInRemaining(timer, now),
-    finished: timer !== null && timer.status === "running" && isFinished(timer, now),
+    finished: timer !== null && timer.status === "running" && justFinished(timer, now),
     connected,
     scoreVersion,
   };

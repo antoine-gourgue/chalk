@@ -111,6 +111,21 @@ export function isFinished(state: TimerState, now: number): boolean {
   return state.status !== "idle" && remainingSeconds(state, now) === 0;
 }
 
+/**
+ * Le bloc vient tout juste de se terminer.
+ *
+ * La distinction compte pour l'écran : l'annonce « TEMPS » est un instant, pas un
+ * état. Sans cette fenêtre, un mur rechargé une heure plus tard rejouerait
+ * l'annonce d'une séance finie depuis longtemps.
+ */
+export function justFinished(state: TimerState, now: number, windowMs = 12_000): boolean {
+  if (!isFinished(state, now)) {
+    return false;
+  }
+  const endedAt = state.startedAt + state.accumulatedPauseMs + state.durationSeconds * 1000;
+  return now - endedAt < windowMs;
+}
+
 /** Les dix dernières secondes, où l'écran bascule au rose. */
 export function isFinalCountdown(state: TimerState, now: number): boolean {
   if (leadInRemaining(state, now) > 0) {

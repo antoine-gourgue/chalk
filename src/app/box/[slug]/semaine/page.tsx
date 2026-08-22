@@ -15,6 +15,7 @@ import {
   todayIn,
   weekDays,
 } from "@/lib/dates";
+import { prisma } from "@/lib/db";
 import { coachPage } from "@/lib/guard";
 import { BLOCK_FORMAT_LABELS, BLOCK_KIND_LABELS } from "@/lib/workout-schema";
 import { getWeekWorkouts } from "@/lib/workouts";
@@ -43,8 +44,41 @@ export default async function WeekPage({
 
   const today = todayIn(box.timezone);
   const monday = mondayOf(du ? toDayDate(du) : today);
-  const workouts = await getWeekWorkouts(box.id, monday);
-  const programmed = weekDays(monday).filter((day) => workouts.has(toDayKey(day))).length;
+  const [workouts, memberCount, activeScreens, scoresToday] = await Promise.all([
+    getWeekWorkouts(box.id, monday),
+    prisma.membership.count({ where: { boxId: box.id, active: true } }),
+    prisma.wallDevice.count({ where: { boxId: box.id, pairedAt: { not: null } } }),
+    prisma.result.count({ where: { block: { workout: { boxId: box.id, date: today } } } }),
+  ]);
+
+  const days = weekDays(monday);
+  const programmed = days.filter((day) => workouts.has(toDayKey(day))).length;
+  const drafts = days.filter((day) => workouts.get(toDayKey(day))?.publishedAt === null).length;
+  const todayWorkout = workouts.get(toDayKey(today));
+
+  const stats = [
+    {
+      label: "Cette semaine",
+      value: `${programmed} / 7`,
+      hint: drafts === 0 ? "toutes publiées" : `${drafts} en brouillon`,
+    },
+    {
+      label: "Aujourd'hui",
+      value: todayWorkout?.title ?? "À programmer",
+      hint:
+        todayWorkout === undefined
+          ? "le mur n'affiche rien"
+          : `${scoresToday} score${scoresToday > 1 ? "s" : ""} saisi${scoresToday > 1 ? "s" : ""}`,
+      accent: todayWorkout === undefined,
+    },
+    { label: "Membres", value: `${memberCount}`, hint: "dans la salle" },
+    {
+      label: "Écrans",
+      value: `${activeScreens}`,
+      hint: activeScreens === 0 ? "aucun appairé" : "appairé" + (activeScreens > 1 ? "s" : ""),
+      accent: activeScreens === 0,
+    },
+  ];
 
   return (
     <BoxShell slug={slug} boxName={box.name} userName={user.name} active="semaine">
@@ -77,8 +111,28 @@ export default async function WeekPage({
           </div>
         </div>
 
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className={cn(
+                "border-edge-soft flex flex-col gap-1 rounded-2xl border px-5 py-4",
+                stat.accent === true ? "border-urgent/30 bg-urgent/[0.06]" : "bg-white/[0.03]",
+              )}
+            >
+              <span className="text-chalk-faint font-mono text-[10px] tracking-[0.16em] uppercase">
+                {stat.label}
+              </span>
+              <span className="truncate text-xl font-extrabold tracking-[-0.02em]">
+                {stat.value}
+              </span>
+              <span className="text-chalk-faint text-xs">{stat.hint}</span>
+            </div>
+          ))}
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          {weekDays(monday).map((day) => {
+          {days.map((day) => {
             const workout = workouts.get(toDayKey(day));
             const isToday = isSameDay(day, today);
 
