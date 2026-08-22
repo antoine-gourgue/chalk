@@ -15,6 +15,23 @@ export function toDayKey(date: Date): string {
   return toDayDate(date).toISOString().slice(0, 10);
 }
 
+/**
+ * Le jour courant tel que le vit la salle, dans son propre fuseau.
+ *
+ * Compter en UTC ferait basculer la séance du jour à deux heures du matin en été
+ * à Paris : le mur afficherait encore la veille pendant que la salle a déjà
+ * changé de jour, et inversement.
+ */
+export function todayIn(timeZone: string, now: Date = new Date()): Date {
+  const formatted = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  return toDayDate(formatted);
+}
+
 export function addDays(date: Date, days: number): Date {
   return new Date(toDayDate(date).getTime() + days * 86_400_000);
 }

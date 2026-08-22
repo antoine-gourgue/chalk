@@ -16,6 +16,12 @@ npm run db:migrate
 npm run dev:all           # Next.js + passerelle temps réel
 ```
 
+## Voir le produit
+
+- `/demo/wall` — le mur de la salle de démonstration, sans compte ni appairage
+- `/box/demo/chrono` — le pupitre du coach qui le pilote
+- `/app/demo` — l'app membre, qui remplit le classement
+
 ## Comptes de démonstration
 
 Après `npm run db:seed`, mot de passe `chalk` pour tout le monde :

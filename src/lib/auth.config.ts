@@ -1,14 +1,14 @@
 import type { NextAuthConfig } from "next-auth";
 
 const PUBLIC_EXACT = new Set(["/", "/connexion", "/robots.txt", "/favicon.ico"]);
-const PUBLIC_PREFIXES = ["/wall", "/api/health", "/api/auth"];
+const PUBLIC_PREFIXES = ["/wall", "/demo", "/api/health", "/api/auth"];
 
 /**
  * Configuration compatible Edge, partagée entre le runtime Node et le middleware :
  * aucune dépendance à Prisma ni à bcrypt ici, sinon le middleware ne démarre pas.
  *
  * Le mur reste public : un écran s'authentifie par son jeton d'appairage, pas par
- * un compte.
+ * un compte. Le mur de démonstration l'est aussi — c'est la vitrine.
  */
 export const authConfig = {
   pages: { signIn: "/connexion" },

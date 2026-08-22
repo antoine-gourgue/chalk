@@ -33,7 +33,20 @@ config compatible Edge : ni Prisma ni bcrypt, sinon il ne démarre pas.
 écran calcule son affichage (`src/lib/timer.ts`), et la dérive d'horloge est corrigée à la poignée
 de main. Sinon le mur et les téléphones divergent de plusieurs secondes.
 
+## Dates
+
+Le jour courant se calcule **dans le fuseau de la salle** (`Box.timezone`), jamais en UTC :
+`todayIn()` dans `src/lib/dates.ts`. Compter en UTC ferait basculer la séance du jour à deux heures
+du matin en été à Paris.
+
 ## Le mur
+
+`/demo/wall` montre le mur de la salle de démonstration, sans appairage ni compte : c'est la vitrine.
+
+Le départ passe par un décompte de mise en route : `startTimer` place simplement l'instant de départ
+dans le futur, donc le chrono ne ment jamais pendant le « 3, 2, 1 ». Le mouvement à l'écran ne sert
+qu'à trois choses — annoncer le départ, avertir de la fin, montrer qu'un score vient de tomber — et
+s'efface sous `prefers-reduced-motion`.
 
 L'écran de la salle n'a pas de compte : le coach génère un code à six caractères depuis
 `/box/<slug>/ecrans`, l'écran le saisit sur `/wall`, et repart avec un jeton d'appareil dans un

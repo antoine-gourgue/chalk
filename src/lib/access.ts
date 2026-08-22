@@ -14,7 +14,7 @@ export class AccessError extends Error {
 }
 
 export type BoxAccess = {
-  box: { id: string; slug: string; name: string; demo: boolean };
+  box: { id: string; slug: string; name: string; demo: boolean; timezone: string };
   user: { id: string; name: string };
   role: Role;
 };
@@ -46,7 +46,7 @@ export async function requireMember(slug: string): Promise<BoxAccess> {
   }
 
   return {
-    box: { id: box.id, slug: box.slug, name: box.name, demo: box.demo },
+    box: { id: box.id, slug: box.slug, name: box.name, demo: box.demo, timezone: box.timezone },
     user: membership.user,
     role: membership.role,
   };

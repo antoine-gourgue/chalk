@@ -1,7 +1,7 @@
 import { ChalkMark } from "@/components/chalk-mark";
 import { ScoreForm, type ExistingResult } from "@/components/score-form";
 import { SignOutButton } from "@/components/sign-out-button";
-import { formatDayLong, toDayDate } from "@/lib/dates";
+import { formatDayLong, todayIn } from "@/lib/dates";
 import { prisma } from "@/lib/db";
 import { memberPage } from "@/lib/guard";
 import { compareResults, formatScore, type ScoreType } from "@/lib/score";
@@ -15,7 +15,7 @@ export default async function MemberHome({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const { box, user } = await memberPage(slug);
 
-  const today = toDayDate(new Date());
+  const today = todayIn(box.timezone);
   const workout = await getWorkoutByDate(box.id, today);
   const published = workout !== null && workout.publishedAt !== null ? workout : null;
 

@@ -1,6 +1,6 @@
 import { BoxShell } from "@/components/box-shell";
 import { TimerControl, type ControlBlock } from "@/components/timer-control";
-import { formatDayLong, toDayDate } from "@/lib/dates";
+import { formatDayLong, todayIn } from "@/lib/dates";
 import { coachPage } from "@/lib/guard";
 import { getWorkoutByDate } from "@/lib/workouts";
 
@@ -8,7 +8,7 @@ export default async function TimerPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const { box, user } = await coachPage(slug);
 
-  const today = toDayDate(new Date());
+  const today = todayIn(box.timezone);
   const workout = await getWorkoutByDate(box.id, today);
 
   const blocks: ControlBlock[] =

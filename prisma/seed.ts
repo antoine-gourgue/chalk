@@ -165,8 +165,15 @@ const MOVEMENTS: MovementSeed[] = [
   { slug: "hip-mobility", name: "Mobilité hanches", modality: "ACCESSORY" },
 ];
 
-function toDayDate(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+/** Le jour courant dans le fuseau de la salle, comme partout ailleurs dans l'app. */
+function todayIn(timeZone: string): Date {
+  const formatted = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  return new Date(`${formatted}T00:00:00.000Z`);
 }
 
 async function main(): Promise<void> {
@@ -261,7 +268,7 @@ async function main(): Promise<void> {
    * démonstration doit toujours avoir quelque chose à afficher au mur, quel que
    * soit le jour où on la visite.
    */
-  const today = toDayDate(new Date());
+  const today = todayIn(box.timezone);
   const existingWorkout = await prisma.workout.findUnique({
     where: { boxId_date: { boxId: box.id, date: today } },
   });

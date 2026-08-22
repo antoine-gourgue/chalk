@@ -24,15 +24,38 @@ export type TimerState = {
   accumulatedPauseMs: number;
 };
 
-export function startTimer(blockId: string, durationSeconds: number, now: number): TimerState {
+/**
+ * Lance un bloc, éventuellement après un décompte de mise en route.
+ *
+ * Le décompte n'est pas un effet visuel : l'instant de départ est simplement
+ * placé dans le futur. Le chrono ne ment donc jamais — pendant le « 3, 2, 1 », il
+ * n'a pas encore commencé, pour tout le monde en même temps.
+ */
+export function startTimer(
+  blockId: string,
+  durationSeconds: number,
+  now: number,
+  leadInSeconds = 0,
+): TimerState {
   return {
     blockId,
     status: "running",
-    startedAt: now,
+    startedAt: now + Math.max(0, leadInSeconds) * 1000,
     durationSeconds,
     pausedAt: null,
     accumulatedPauseMs: 0,
   };
+}
+
+/**
+ * Secondes restantes avant le départ, quand le bloc est en décompte de mise en
+ * route. Rend 0 dès que le chrono a commencé.
+ */
+export function leadInRemaining(state: TimerState, now: number): number {
+  if (state.status !== "running" || now >= state.startedAt) {
+    return 0;
+  }
+  return Math.ceil((state.startedAt - now) / 1000);
 }
 
 export function pauseTimer(state: TimerState, now: number): TimerState {
@@ -90,6 +113,9 @@ export function isFinished(state: TimerState, now: number): boolean {
 
 /** Les dix dernières secondes, où l'écran bascule au rose. */
 export function isFinalCountdown(state: TimerState, now: number): boolean {
+  if (leadInRemaining(state, now) > 0) {
+    return false;
+  }
   const remaining = remainingSeconds(state, now);
   return state.status === "running" && remaining > 0 && remaining <= 10;
 }

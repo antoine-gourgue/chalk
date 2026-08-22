@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   clockOffset,
+  leadInRemaining,
   elapsedMs,
   formatClock,
   isFinalCountdown,
@@ -68,6 +69,38 @@ describe("décompte", () => {
     const surLeMur = remainingSeconds(state, T0 + 100_000 + 3_000);
     const surLeTelephone = remainingSeconds(state, T0 + 100_000 - 1_500);
     expect(surLeMur).not.toBe(surLeTelephone);
+  });
+});
+
+describe("décompte de mise en route", () => {
+  it("compte 3, 2, 1 avant de démarrer", () => {
+    const state = startTimer("block-1", AMRAP_12, T0, 3);
+    expect(leadInRemaining(state, T0)).toBe(3);
+    expect(leadInRemaining(state, T0 + 1_200)).toBe(2);
+    expect(leadInRemaining(state, T0 + 2_500)).toBe(1);
+    expect(leadInRemaining(state, T0 + 3_000)).toBe(0);
+  });
+
+  it("ne fait pas tourner le chrono pendant le décompte", () => {
+    const state = startTimer("block-1", AMRAP_12, T0, 3);
+    expect(remainingSeconds(state, T0 + 1_000)).toBe(720);
+    expect(elapsedMs(state, T0 + 2_000)).toBe(0);
+    expect(progressRatio(state, T0 + 2_000)).toBe(0);
+  });
+
+  it("démarre pour de bon une fois le décompte écoulé", () => {
+    const state = startTimer("block-1", AMRAP_12, T0, 3);
+    expect(remainingSeconds(state, T0 + 3_000 + 60_000)).toBe(660);
+  });
+
+  it("n'allume pas la dernière ligne droite pendant le décompte", () => {
+    const state = startTimer("block-1", 5, T0, 3);
+    expect(isFinalCountdown(state, T0 + 1_000)).toBe(false);
+    expect(isFinalCountdown(state, T0 + 3_500)).toBe(true);
+  });
+
+  it("reste à zéro quand aucun décompte n'a été demandé", () => {
+    expect(leadInRemaining(startTimer("block-1", AMRAP_12, T0), T0)).toBe(0);
   });
 });
 

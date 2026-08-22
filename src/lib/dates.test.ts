@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { addDays, formatWeekRange, mondayOf, toDayDate, toDayKey, weekDays } from "./dates";
+import {
+  addDays,
+  formatWeekRange,
+  mondayOf,
+  toDayDate,
+  toDayKey,
+  todayIn,
+  weekDays,
+} from "./dates";
 
 describe("mondayOf", () => {
   it("rend le lundi pour un jour de milieu de semaine", () => {
@@ -60,5 +68,27 @@ describe("formatWeekRange", () => {
 
   it("nomme les deux mois quand la semaine est à cheval", () => {
     expect(formatWeekRange(toDayDate("2026-08-31"))).toBe("31 août — 6 septembre");
+  });
+});
+
+describe("todayIn", () => {
+  /**
+   * Le piège : entre minuit et deux heures du matin en été, l'heure UTC est
+   * encore la veille. C'est exactement le créneau où une salle range son matériel.
+   */
+  it("bascule à minuit dans le fuseau de la salle, pas à minuit UTC", () => {
+    const justeApresMinuitAParis = new Date("2026-08-22T22:30:00.000Z");
+    expect(toDayKey(todayIn("Europe/Paris", justeApresMinuitAParis))).toBe("2026-08-23");
+  });
+
+  it("reste sur le jour en cours avant minuit local", () => {
+    const vingtTroisHeuresAParis = new Date("2026-08-22T21:00:00.000Z");
+    expect(toDayKey(todayIn("Europe/Paris", vingtTroisHeuresAParis))).toBe("2026-08-22");
+  });
+
+  it("suit le fuseau demandé, pas celui du serveur", () => {
+    const instant = new Date("2026-08-22T22:30:00.000Z");
+    expect(toDayKey(todayIn("America/New_York", instant))).toBe("2026-08-22");
+    expect(toDayKey(todayIn("Australia/Sydney", instant))).toBe("2026-08-23");
   });
 });

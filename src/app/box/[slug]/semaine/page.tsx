@@ -11,6 +11,7 @@ import {
   mondayOf,
   toDayKey,
   toDayDate,
+  todayIn,
   weekDays,
 } from "@/lib/dates";
 import { coachPage } from "@/lib/guard";
@@ -29,9 +30,9 @@ export default async function WeekPage({
 
   const { box, user } = await coachPage(slug);
 
-  const monday = mondayOf(du ? toDayDate(du) : new Date());
+  const monday = mondayOf(du ? toDayDate(du) : todayIn(box.timezone));
   const workouts = await getWeekWorkouts(box.id, monday);
-  const today = toDayDate(new Date());
+  const today = todayIn(box.timezone);
 
   return (
     <BoxShell slug={slug} boxName={box.name} userName={user.name} active="semaine">

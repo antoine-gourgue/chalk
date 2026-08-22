@@ -86,7 +86,7 @@ const httpServer = createServer(async (request, response) => {
 
     let next: TimerState | undefined;
     if (command.command === "start") {
-      next = startTimer(command.blockId, command.durationSeconds, now);
+      next = startTimer(command.blockId, command.durationSeconds, now, command.leadInSeconds ?? 0);
     } else if (current !== undefined) {
       if (command.command === "pause") {
         next = pauseTimer(current, now);

@@ -21,7 +21,7 @@ export type ControlBlock = {
  * regarder l'écran derrière lui pour savoir où en est le chrono.
  */
 export function TimerControl({ boxSlug, blocks }: { boxSlug: string; blocks: ControlBlock[] }) {
-  const { timer, remaining, finalCountdown, connected } = useBoxTimer(boxSlug);
+  const { timer, remaining, finalCountdown, leadIn, connected } = useBoxTimer(boxSlug);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState(blocks[0]?.id ?? "");
@@ -78,7 +78,13 @@ export function TimerControl({ boxSlug, blocks }: { boxSlug: string; blocks: Con
           {formatClock(shownSeconds)}
         </span>
         <span className="text-chalk-faint text-sm">
-          {running ? "En cours" : paused ? "En pause" : "Prêt"}
+          {leadIn > 0
+            ? `Départ dans ${leadIn}`
+            : running
+              ? "En cours"
+              : paused
+                ? "En pause"
+                : "Prêt"}
         </span>
       </div>
 
@@ -140,6 +146,8 @@ export function TimerControl({ boxSlug, blocks }: { boxSlug: string; blocks: Con
                           blockId: selected,
                           durationSeconds:
                             blocks.find((block) => block.id === selected)?.durationSeconds ?? 0,
+                          /** Le « 3, 2, 1 » de la salle, avant que le chrono ne parte. */
+                          leadInSeconds: 3,
                         },
                   )
                 }
