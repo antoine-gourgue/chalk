@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createPairingCode, revokeDevice } from "@/app/box/[slug]/actions";
+import { Button, Card, FIELD } from "@/components/ui/primitives";
+import { cn } from "@/lib/cn";
 import { PAIRING_TTL_MINUTES } from "@/lib/pairing";
 
 export type DeviceRow = {
@@ -38,16 +40,16 @@ export function PairingPanel({ slug, devices }: { slug: string; devices: DeviceR
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="border-edge-soft bg-night flex flex-col gap-3 rounded-2xl border p-5">
+      <Card className="flex flex-col gap-4 p-5">
         <div className="flex flex-wrap gap-2">
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Nom de l'écran — « Grand mur »"
             aria-label="Nom de l'écran"
-            className="border-edge-soft focus:border-brand focus-visible:ring-brand/40 min-w-48 flex-1 rounded-xl border bg-white/5 px-4 py-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className={cn(FIELD, "min-w-48 flex-1")}
           />
-          <button
+          <Button
             type="button"
             disabled={pending}
             onClick={() => {
@@ -63,18 +65,17 @@ export function PairingPanel({ slug, devices }: { slug: string; devices: DeviceR
                 }
               });
             }}
-            className="brand-gradient text-void focus-visible:ring-brand rounded-full px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
           >
             {pending ? "…" : "Générer un code"}
-          </button>
+          </Button>
         </div>
 
         {code === null ? null : (
-          <div className="border-brand/40 bg-brand/10 flex flex-col items-center gap-1 rounded-xl border py-5">
+          <div className="border-brand/40 bg-brand/10 flex flex-col items-center gap-2 rounded-2xl border py-7">
             <span className="text-chalk-faint font-mono text-[11px] tracking-[0.18em] uppercase">
               À saisir sur l&apos;écran, sous {PAIRING_TTL_MINUTES} minutes
             </span>
-            <span className="font-mono text-5xl font-semibold tracking-[0.2em] tabular-nums">
+            <span className="brand-text font-mono text-6xl font-bold tracking-[0.18em] tabular-nums">
               {code}
             </span>
           </div>
@@ -88,7 +89,7 @@ export function PairingPanel({ slug, devices }: { slug: string; devices: DeviceR
             {error}
           </p>
         )}
-      </div>
+      </Card>
 
       <div className="flex flex-col gap-2">
         {devices.length === 0 ? (
@@ -97,7 +98,7 @@ export function PairingPanel({ slug, devices }: { slug: string; devices: DeviceR
           devices.map((device) => (
             <div
               key={device.id}
-              className="border-edge-soft flex flex-wrap items-center gap-3 rounded-2xl border bg-white/3 px-4 py-3"
+              className="border-edge-soft flex flex-wrap items-center gap-3 rounded-2xl border bg-white/[0.03] px-4 py-3.5"
             >
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{device.name}</p>

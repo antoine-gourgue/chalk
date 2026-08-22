@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteWorkout, saveWorkout } from "@/app/box/[slug]/actions";
+import { Button, Card, FIELD } from "@/components/ui/primitives";
 import { cn } from "@/lib/cn";
 import {
   BLOCK_FORMATS,
@@ -25,8 +26,17 @@ const MODALITY_LABELS: Record<string, string> = {
   ACCESSORY: "Accessoire",
 };
 
-const field =
-  "border-edge-soft focus:border-brand focus-visible:ring-brand/40 rounded-lg border bg-white/5 px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none";
+const field = cn(FIELD, "px-3 py-2");
+
+/** Chaque type de bloc porte sa couleur, du tableau de la semaine à l'éditeur. */
+const KIND_ACCENT: Record<string, string> = {
+  WARMUP: "before:bg-white/20",
+  STRENGTH: "before:bg-brand",
+  GYMNASTICS: "before:bg-data",
+  METCON: "before:bg-urgent",
+  ACCESSORY: "before:bg-white/25",
+  COOLDOWN: "before:bg-white/15",
+};
 
 /** Convertit une saisie en nombre, en traitant le champ vide comme « non renseigné ». */
 function toNumber(value: string): number | null {
@@ -128,7 +138,7 @@ export function WorkoutEditor({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="bg-void/80 border-edge-soft sticky top-[57px] z-20 -mx-6 flex flex-wrap items-end justify-between gap-4 border-b px-6 py-4 backdrop-blur-xl">
         <div className="min-w-0 flex-1">
           <p className="text-chalk-faint font-mono text-[11px] tracking-[0.18em] uppercase">
             {dateLabel}
@@ -160,8 +170,10 @@ export function WorkoutEditor({
           </label>
 
           {exists ? (
-            <button
+            <Button
               type="button"
+              variant="danger"
+              size="sm"
               disabled={pending}
               onClick={() => {
                 startTransition(async () => {
@@ -169,20 +181,14 @@ export function WorkoutEditor({
                   router.push(`/box/${slug}/semaine?du=${date}`);
                 });
               }}
-              className="border-edge text-chalk-dim hover:text-urgent hover:border-urgent/50 focus-visible:ring-urgent rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               Supprimer
-            </button>
+            </Button>
           ) : null}
 
-          <button
-            type="button"
-            disabled={pending}
-            onClick={save}
-            className="brand-gradient text-void focus-visible:ring-brand rounded-full px-5 py-2 text-sm font-bold transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
-          >
+          <Button type="button" disabled={pending} onClick={save}>
             {pending ? "Enregistrement…" : "Enregistrer"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -199,9 +205,13 @@ export function WorkoutEditor({
 
       <div className="flex flex-col gap-4">
         {blocks.map((block, blockIndex) => (
-          <section
+          <Card
             key={blockIndex}
-            className="border-edge-soft bg-night flex flex-col gap-4 rounded-2xl border p-5"
+            className={cn(
+              "relative flex flex-col gap-4 overflow-hidden p-5 pl-6",
+              "before:absolute before:inset-y-0 before:left-0 before:w-1 before:content-['']",
+              KIND_ACCENT[block.kind] ?? "before:bg-white/20",
+            )}
           >
             <div className="flex flex-wrap items-center gap-2">
               <select
@@ -423,7 +433,7 @@ export function WorkoutEditor({
               aria-label="Consigne du bloc"
               className={cn(field, "w-full")}
             />
-          </section>
+          </Card>
         ))}
 
         <button

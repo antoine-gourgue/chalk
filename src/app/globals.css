@@ -55,7 +55,20 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/** Le dégradé de marque, réservé à la marque, à l'anneau du chrono et au bouton principal. */
+/**
+ * Le dégradé de marque, réservé à la marque, à l'anneau du chrono et au bouton
+ * principal. On écrit `background-image` et non `background` : le raccourci
+ * réinitialiserait `background-clip`, et le texte en dégradé se transformerait en
+ * pavé de couleur.
+ */
 .brand-gradient {
-  background: linear-gradient(96deg, var(--pink), var(--violet) 55%, var(--cyan));
+  background-image: linear-gradient(96deg, var(--pink), var(--violet) 55%, var(--cyan));
+}
+
+/** Le même dégradé, appliqué au tracé des lettres. */
+.brand-text {
+  background-image: linear-gradient(96deg, var(--pink), var(--violet) 55%, var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

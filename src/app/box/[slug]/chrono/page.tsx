@@ -1,5 +1,6 @@
 import { BoxShell } from "@/components/box-shell";
 import { TimerControl, type ControlBlock } from "@/components/timer-control";
+import { PageTitle } from "@/components/ui/primitives";
 import { formatDayLong, todayIn } from "@/lib/dates";
 import { coachPage } from "@/lib/guard";
 import { getWorkoutByDate } from "@/lib/workouts";
@@ -22,15 +23,12 @@ export default async function TimerPage({ params }: { params: Promise<{ slug: st
 
   return (
     <BoxShell slug={slug} boxName={box.name} userName={user.name} active="chrono">
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-6 py-7">
-        <div>
-          <p className="text-chalk-faint font-mono text-[11px] tracking-[0.18em] uppercase">
-            {formatDayLong(today)}
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-7 px-6 py-8">
+        <PageTitle eyebrow={formatDayLong(today)} title={workout?.title ?? "Chrono"}>
+          <p className="text-chalk-dim mt-1 text-sm">
+            Ce que tu lances ici part sur le mur de la salle, à la même seconde.
           </p>
-          <h1 className="text-3xl font-extrabold tracking-[-0.03em]">
-            {workout?.title ?? "Chrono"}
-          </h1>
-        </div>
+        </PageTitle>
 
         <TimerControl boxSlug={slug} blocks={blocks} />
       </main>

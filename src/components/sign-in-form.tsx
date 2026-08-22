@@ -2,9 +2,8 @@
 
 import { useActionState } from "react";
 import { signInWithPassword, type SignInState } from "@/app/connexion/actions";
-
-const field =
-  "border-edge-soft focus:border-brand focus-visible:ring-brand/40 w-full rounded-xl border bg-white/5 px-4 py-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none";
+import { Button, FIELD } from "@/components/ui/primitives";
+import { cn } from "@/lib/cn";
 
 export function SignInForm() {
   const [state, formAction, pending] = useActionState<SignInState, FormData>(signInWithPassword, {
@@ -23,7 +22,7 @@ export function SignInForm() {
           autoComplete="email"
           required
           placeholder="lea@chalk.demo"
-          className={field}
+          className={cn(FIELD, "py-3.5 text-base")}
         />
       </label>
 
@@ -36,26 +35,22 @@ export function SignInForm() {
           type="password"
           autoComplete="current-password"
           required
-          className={field}
+          className={cn(FIELD, "py-3.5 text-base")}
         />
       </label>
 
-      {state.error ? (
+      {state.error === null ? null : (
         <p
           role="alert"
           className="border-urgent/40 bg-urgent/10 text-urgent rounded-xl border px-4 py-3 text-sm"
         >
           {state.error}
         </p>
-      ) : null}
+      )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="brand-gradient text-void focus-visible:ring-brand mt-1 rounded-full px-5 py-3.5 text-sm font-bold transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
-      >
+      <Button type="submit" size="lg" disabled={pending} className="mt-1 w-full">
         {pending ? "Connexion…" : "Entrer"}
-      </button>
+      </Button>
     </form>
   );
 }

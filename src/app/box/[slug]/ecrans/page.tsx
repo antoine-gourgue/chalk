@@ -1,5 +1,6 @@
 import { BoxShell } from "@/components/box-shell";
 import { PairingPanel, type DeviceRow } from "@/components/pairing-panel";
+import { PageTitle } from "@/components/ui/primitives";
 import { prisma } from "@/lib/db";
 import { coachPage } from "@/lib/guard";
 
@@ -23,18 +24,14 @@ export default async function ScreensPage({ params }: { params: Promise<{ slug: 
 
   return (
     <BoxShell slug={slug} boxName={box.name} userName={user.name} active="ecrans">
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-7">
-        <div>
-          <p className="text-chalk-faint font-mono text-[11px] tracking-[0.18em] uppercase">
-            Écrans
-          </p>
-          <h1 className="text-3xl font-extrabold tracking-[-0.03em]">Le mur de la salle</h1>
-          <p className="text-chalk-dim mt-2 text-sm">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-7 px-6 py-8">
+        <PageTitle eyebrow="Écrans" title="Le mur de la salle">
+          <p className="text-chalk-dim mt-2 max-w-prose text-sm">
             Sur l&apos;écran de la salle, ouvre <span className="text-chalk">/wall</span> et saisis
             le code généré ici. Une fois appairé, l&apos;écran reste connecté : il n&apos;a pas de
             compte, c&apos;est l&apos;appareil lui-même qui est reconnu.
           </p>
-        </div>
+        </PageTitle>
 
         <PairingPanel slug={slug} devices={rows} />
       </main>
