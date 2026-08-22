@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { AccessError, requireCoach } from "@/lib/access";
 import { prisma } from "@/lib/db";
 import { addDays, toDayDate, toDayKey } from "@/lib/dates";
+import { generateDeviceToken, generatePairingCode, PAIRING_TTL_MINUTES } from "@/lib/pairing";
+import { sendTimerCommand } from "@/lib/realtime";
+import { timerCommandSchema, type TimerCommand } from "@/lib/timer-command";
 import { workoutSchema, type WorkoutInput } from "@/lib/workout-schema";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -182,4 +185,72 @@ export async function duplicateWeek(boxSlug: string, sourceMonday: string): Prom
   return copied > 0
     ? { ok: true }
     : { ok: false, error: "La semaine suivante est déjà entièrement programmée" };
+}
+
+/**
+ * Génère un code d'appairage pour un nouvel écran.
+ *
+ * L'appareil est créé immédiatement avec son jeton définitif ; le code n'est que
+ * le laissez-passer temporaire qui permet à l'écran de venir le chercher.
+ */
+export async function createPairingCode(
+  boxSlug: string,
+  name: string,
+): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
+  let box;
+  try {
+    box = await requireBox(boxSlug);
+  } catch (error) {
+    const result = toActionResult(error);
+    return result.ok ? { ok: false, error: "Accès refusé" } : result;
+  }
+
+  const trimmed = name.trim() === "" ? "Écran de la salle" : name.trim().slice(0, 40);
+  const code = generatePairingCode();
+
+  await prisma.wallDevice.create({
+    data: {
+      boxId: box.id,
+      name: trimmed,
+      token: generateDeviceToken(),
+      pairingCode: code,
+      pairingExpiresAt: new Date(Date.now() + PAIRING_TTL_MINUTES * 60_000),
+    },
+  });
+
+  revalidatePath(`/box/${boxSlug}/ecrans`);
+  return { ok: true, code };
+}
+
+export async function revokeDevice(boxSlug: string, deviceId: string): Promise<ActionResult> {
+  let box;
+  try {
+    box = await requireBox(boxSlug);
+  } catch (error) {
+    return toActionResult(error);
+  }
+  await prisma.wallDevice.deleteMany({ where: { id: deviceId, boxId: box.id } });
+  revalidatePath(`/box/${boxSlug}/ecrans`);
+  return { ok: true };
+}
+
+/**
+ * Pilotage du chrono. L'autorisation est vérifiée ici, dans Next ; la passerelle
+ * temps réel ne fait qu'exécuter une commande déjà signée par le secret partagé.
+ */
+export async function controlTimer(input: TimerCommand): Promise<ActionResult> {
+  const parsed = timerCommandSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Commande invalide" };
+  }
+  try {
+    await requireBox(parsed.data.boxSlug);
+  } catch (error) {
+    return toActionResult(error);
+  }
+
+  const delivered = await sendTimerCommand(parsed.data);
+  return delivered
+    ? { ok: true }
+    : { ok: false, error: "La passerelle temps réel ne répond pas — l'écran n'a rien reçu." };
 }

@@ -6,9 +6,8 @@ import { cn } from "@/lib/cn";
 
 const TABS = [
   { href: "semaine", label: "Semaine" },
-  { href: "cours", label: "Cours" },
-  { href: "membres", label: "Membres" },
-  { href: "mouvements", label: "Mouvements" },
+  { href: "chrono", label: "Chrono" },
+  { href: "ecrans", label: "Écrans" },
 ];
 
 /** Cadre commun de l'espace coach : marque, navigation, salle courante. */

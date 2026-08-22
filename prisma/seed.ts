@@ -165,18 +165,8 @@ const MOVEMENTS: MovementSeed[] = [
   { slug: "hip-mobility", name: "Mobilité hanches", modality: "ACCESSORY" },
 ];
 
-/** Le lundi de la semaine en cours, à minuit. */
-function mondayOfThisWeek(): Date {
-  const now = new Date();
-  const day = now.getUTCDay() === 0 ? 7 : now.getUTCDay();
-  const monday = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (day - 1)),
-  );
-  return monday;
-}
-
-function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+function toDayDate(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 async function main(): Promise<void> {
@@ -262,21 +252,25 @@ async function main(): Promise<void> {
   }
   console.log("✓ 25 créneaux hebdomadaires");
 
-  const monday = mondayOfThisWeek();
   const movementBySlug = new Map(
     (await prisma.movement.findMany({ where: { boxId: null } })).map((m) => [m.slug, m.id]),
   );
 
-  const tuesday = addDays(monday, 1);
+  /**
+   * La séance principale est datée d'aujourd'hui, pas d'un jour fixe : la salle de
+   * démonstration doit toujours avoir quelque chose à afficher au mur, quel que
+   * soit le jour où on la visite.
+   */
+  const today = toDayDate(new Date());
   const existingWorkout = await prisma.workout.findUnique({
-    where: { boxId_date: { boxId: box.id, date: tuesday } },
+    where: { boxId_date: { boxId: box.id, date: today } },
   });
 
   if (!existingWorkout) {
     await prisma.workout.create({
       data: {
         boxId: box.id,
-        date: tuesday,
+        date: today,
         title: "AMRAP 12",
         coachNotes: "Garder un rythme régulier sur les thrusters, ne pas partir trop vite.",
         publishedAt: new Date(),
@@ -327,7 +321,50 @@ async function main(): Promise<void> {
         },
       },
     });
-    console.log("✓ séance du mardi");
+    console.log("✓ séance du jour");
+  }
+
+  /**
+   * Quelques scores sur le metcon, pour que le mur ait un classement à afficher
+   * avant que la saisie de performance n'existe.
+   *
+   * `value` porte le total de répétitions effectuées — c'est lui qui classe, là
+   * où « 5 + 14 » n'est qu'une façon de l'écrire.
+   */
+  const REPS_PER_ROUND = 27;
+  const metcon = await prisma.block.findFirst({
+    where: { workout: { boxId: box.id, date: today }, kind: "METCON" },
+  });
+
+  if (metcon !== null) {
+    const scores: [string, number, number, boolean][] = [
+      ["membre1@chalk.demo", 5, 14, true],
+      ["membre2@chalk.demo", 5, 3, true],
+      ["membre3@chalk.demo", 4, 21, false],
+      ["membre4@chalk.demo", 4, 9, true],
+      ["membre5@chalk.demo", 3, 18, false],
+    ];
+
+    for (const [email, rounds, reps, rx] of scores) {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (user === null) {
+        continue;
+      }
+      await prisma.result.upsert({
+        where: { blockId_userId: { blockId: metcon.id, userId: user.id } },
+        update: {},
+        create: {
+          blockId: metcon.id,
+          userId: user.id,
+          scoreType: "ROUNDS_REPS",
+          value: rounds * REPS_PER_ROUND + reps,
+          rounds,
+          reps,
+          rx,
+        },
+      });
+    }
+    console.log(`✓ ${scores.length} scores sur le metcon`);
   }
 }
 

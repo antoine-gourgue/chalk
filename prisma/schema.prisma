@@ -310,12 +310,17 @@ model PersonalRecord {
 
 /// Un écran appairé à une salle. Le jeton est porté par l'appareil, jamais par un compte.
 model WallDevice {
-  id       String    @id @default(cuid())
-  boxId    String
-  name     String
-  token    String    @unique
-  pairedAt DateTime  @default(now())
-  lastSeen DateTime?
+  id    String @id @default(cuid())
+  boxId String
+  name  String
+  token String @unique
+
+  /// Code à six caractères affiché sur l'écran le temps de l'appairage, puis effacé.
+  pairingCode      String?   @unique
+  pairingExpiresAt DateTime?
+  pairedAt         DateTime?
+  lastSeen         DateTime?
+  createdAt        DateTime  @default(now())
 
   box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
 

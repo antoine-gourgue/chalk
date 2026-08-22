@@ -33,6 +33,16 @@ config compatible Edge : ni Prisma ni bcrypt, sinon il ne démarre pas.
 écran calcule son affichage (`src/lib/timer.ts`), et la dérive d'horloge est corrigée à la poignée
 de main. Sinon le mur et les téléphones divergent de plusieurs secondes.
 
+## Le mur
+
+L'écran de la salle n'a pas de compte : le coach génère un code à six caractères depuis
+`/box/<slug>/ecrans`, l'écran le saisit sur `/wall`, et repart avec un jeton d'appareil dans un
+cookie httpOnly. C'est l'appareil qui est authentifié, jamais une personne.
+
+La passerelle `realtime/` ne connaît ni comptes ni rôles : elle exécute des commandes signées par
+`REALTIME_SECRET`, que seul le serveur Next émet après avoir vérifié le rôle. L'autorisation garde
+ainsi un seul endroit où vivre.
+
 ## Design
 
 Direction « salle obscure » : fond violet très sombre, trois couleurs à emploi unique — violet
