@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # typescript-eslint refuse TypeScript 7 et ESLint 10 casse eslint-config-next :
+    # ces deux majeures restent manuelles tant que la chaîne de lint n'a pas suivi.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: development
@@ -23,6 +30,11 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    # L'image doit rester alignée sur .nvmrc : la majeure de Node se change à la main,
+    # des deux côtés en même temps.
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
     groups:
       docker:
         patterns: ["*"]
