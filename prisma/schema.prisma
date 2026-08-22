@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,357 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Salle et personnes
+// ---------------------------------------------------------------------------
+
+/// Une salle = un locataire. Tout le reste lui appartient.
+model Box {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  timezone  String   @default("Europe/Paris")
+  demo      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  movements   Movement[]
+  workouts    Workout[]
+  classSlots  ClassSlot[]
+  devices     WallDevice[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  memberships     Membership[]
+  results         Result[]
+  personalRecords PersonalRecord[]
+  reservations    Reservation[]
+  coachedSlots    ClassSlot[]      @relation("SlotCoach")
+  accounts        Account[]
+  sessions        Session[]
+}
+
+enum Role {
+  OWNER
+  COACH
+  MEMBER
+}
+
+model Membership {
+  id       String   @id @default(cuid())
+  boxId    String
+  userId   String
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
+  active   Boolean  @default(true)
+
+  box  Box  @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boxId, userId])
+  @@index([boxId, role])
+}
+
+// ---------------------------------------------------------------------------
+// Programmation
+// ---------------------------------------------------------------------------
+
+enum Modality {
+  WEIGHTLIFTING
+  GYMNASTICS
+  MONOSTRUCTURAL
+  ACCESSORY
+}
+
+/// Bibliothèque de mouvements. `boxId` nul = mouvement du catalogue commun.
+model Movement {
+  id        String   @id @default(cuid())
+  boxId     String?
+  slug      String
+  name      String
+  modality  Modality
+  /// Un mouvement repère (Fran, back squat…) sur lequel on suit les records.
+  benchmark Boolean  @default(false)
+  /// Unité du record : kg, reps, ou secondes.
+  prUnit    PrUnit?
+  createdAt DateTime @default(now())
+
+  box             Box?             @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  blockMovements  BlockMovement[]
+  personalRecords PersonalRecord[]
+
+  @@unique([boxId, slug])
+  @@index([modality])
+}
+
+enum PrUnit {
+  KG
+  REPS
+  SECONDS
+}
+
+/// La séance d'un jour donné, pour une salle donnée.
+model Workout {
+  id          String   @id @default(cuid())
+  boxId       String
+  date        DateTime @db.Date
+  title       String
+  coachNotes  String?
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  box      Box            @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  blocks   Block[]
+  sessions ClassSession[]
+
+  @@unique([boxId, date])
+  @@index([boxId, date])
+}
+
+enum BlockKind {
+  WARMUP
+  STRENGTH
+  GYMNASTICS
+  METCON
+  ACCESSORY
+  COOLDOWN
+}
+
+/// Format du bloc : il décide de la façon dont le chrono tourne et dont on marque.
+enum BlockFormat {
+  AMRAP
+  FOR_TIME
+  EMOM
+  TABATA
+  INTERVALS
+  STRENGTH_SETS
+  FREE
+}
+
+model Block {
+  id          String      @id @default(cuid())
+  workoutId   String
+  position    Int
+  kind        BlockKind
+  format      BlockFormat
+  title       String?
+  /// Durée du bloc en secondes : plafond d'un AMRAP, limite d'un For Time.
+  durationSeconds Int?
+  /// Nombre de tours pour les formats qui en comptent (EMOM, intervalles).
+  rounds      Int?
+  notes       String?
+
+  workout   Workout         @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  movements BlockMovement[]
+  results   Result[]
+
+  @@unique([workoutId, position])
+}
+
+model BlockMovement {
+  id         String  @id @default(cuid())
+  blockId    String
+  movementId String
+  position   Int
+  /// Répétitions par tour. Nul pour un mouvement chronométré ou une distance.
+  reps       Int?
+  /// Charge prescrite, en kilogrammes.
+  loadMale   Float?
+  loadFemale Float?
+  /// Hauteur, distance ou calories, avec son unité libre (« 60 cm », « 500 m »).
+  target     String?
+  scalingNote String?
+
+  block    Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  movement Movement @relation(fields: [movementId], references: [id])
+
+  @@unique([blockId, position])
+  @@index([movementId])
+}
+
+// ---------------------------------------------------------------------------
+// Cours et réservations
+// ---------------------------------------------------------------------------
+
+/// Créneau récurrent : « tous les mardis à 18 h 30 ».
+model ClassSlot {
+  id        String   @id @default(cuid())
+  boxId     String
+  /// 1 = lundi, 7 = dimanche (ISO 8601).
+  weekday   Int
+  startTime String
+  durationMinutes Int @default(60)
+  capacity  Int      @default(16)
+  coachId   String?
+  active    Boolean  @default(true)
+
+  box      Box            @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  coach    User?          @relation("SlotCoach", fields: [coachId], references: [id])
+  sessions ClassSession[]
+
+  @@index([boxId, weekday])
+}
+
+enum SessionStatus {
+  SCHEDULED
+  RUNNING
+  DONE
+  CANCELLED
+}
+
+/// L'occurrence datée d'un créneau, à laquelle on rattache la séance du jour.
+model ClassSession {
+  id        String        @id @default(cuid())
+  slotId    String
+  workoutId String?
+  startsAt  DateTime
+  status    SessionStatus @default(SCHEDULED)
+
+  slot         ClassSlot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  workout      Workout?      @relation(fields: [workoutId], references: [id])
+  reservations Reservation[]
+  results      Result[]
+
+  @@unique([slotId, startsAt])
+  @@index([startsAt])
+}
+
+enum ReservationStatus {
+  BOOKED
+  WAITLIST
+  CHECKED_IN
+  CANCELLED
+}
+
+model Reservation {
+  id        String            @id @default(cuid())
+  sessionId String
+  userId    String
+  status    ReservationStatus @default(BOOKED)
+  /// Rang dans la liste d'attente, nul si la place est confirmée.
+  waitlistPosition Int?
+  createdAt DateTime          @default(now())
+
+  session ClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Performances
+// ---------------------------------------------------------------------------
+
+enum ScoreType {
+  ROUNDS_REPS
+  TIME
+  LOAD
+  REPS
+}
+
+model Result {
+  id        String    @id @default(cuid())
+  blockId   String
+  userId    String
+  sessionId String?
+  scoreType ScoreType
+  /// Score normalisé pour le classement : secondes, kilos, ou reps totales.
+  value     Float
+  /// Tours complets, pour l'affichage « 5 + 14 » d'un AMRAP.
+  rounds    Int?
+  reps      Int?
+  rx        Boolean   @default(true)
+  note      String?
+  createdAt DateTime  @default(now())
+
+  block   Block         @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session ClassSession? @relation(fields: [sessionId], references: [id])
+
+  @@unique([blockId, userId])
+  @@index([sessionId])
+}
+
+model PersonalRecord {
+  id         String   @id @default(cuid())
+  userId     String
+  movementId String
+  unit       PrUnit
+  value      Float
+  achievedAt DateTime
+  resultId   String?
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movement Movement @relation(fields: [movementId], references: [id], onDelete: Cascade)
+
+  @@index([userId, movementId])
+}
+
+// ---------------------------------------------------------------------------
+// Écran mural
+// ---------------------------------------------------------------------------
+
+/// Un écran appairé à une salle. Le jeton est porté par l'appareil, jamais par un compte.
+model WallDevice {
+  id       String    @id @default(cuid())
+  boxId    String
+  name     String
+  token    String    @unique
+  pairedAt DateTime  @default(now())
+  lastSeen DateTime?
+
+  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+
+  @@index([boxId])
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js
+// ---------------------------------------------------------------------------
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @id
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
