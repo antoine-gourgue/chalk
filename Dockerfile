@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 # --- Dependencies (incl. dev, needed for the build) ---
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 # --- Build the Next.js standalone output ---
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 # Non-secret placeholders so env validation passes; the build never touches the
@@ -27,7 +27,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # --- Production runtime (standalone server) ---
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -45,7 +45,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 CMD ["node", "server.js"]
 
 # --- Realtime gateway (socket.io: timer + live leaderboard) ---
-FROM node:20-alpine AS realtime
+FROM node:26-alpine AS realtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV REALTIME_PORT=3100
@@ -60,7 +60,7 @@ EXPOSE 3100
 CMD ["npx", "tsx", "realtime/index.ts"]
 
 # --- Migration runner (Prisma CLI + schema + migrations) ---
-FROM node:20-alpine AS migrator
+FROM node:26-alpine AS migrator
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json prisma.config.ts ./
