@@ -17,6 +17,16 @@ Next.js App Router · TypeScript strict · Tailwind 4 · Prisma + PostgreSQL · 
 | Coach   | `/box/…` | E-mail                 | Desktop, dense, au clavier         |
 | Membre  | `/app/…` | E-mail                 | Mobile, au pouce, une action/écran |
 
+## Autorisation
+
+Le rôle est porté par l'**appartenance à une salle** (`Membership`), pas par le compte : la même
+personne peut être coach ici et simple membre ailleurs. Les règles sont pures et testées dans
+`src/lib/roles.ts` ; `src/lib/access.ts` les applique (session + base) et `src/lib/guard.ts` les
+traduit en navigation pour les pages. Toute écriture passe par `requireCoach`.
+
+Le fichier `src/proxy.ts` remplace `middleware.ts` (renommé dans Next 16). Il ne charge que la
+config compatible Edge : ni Prisma ni bcrypt, sinon il ne démarre pas.
+
 ## Règle non négociable
 
 **Le chrono ne se diffuse pas tick par tick.** Le serveur garde l'instant de départ du bloc, chaque

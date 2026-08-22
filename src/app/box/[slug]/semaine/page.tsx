@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { BoxShell } from "@/components/box-shell";
 import { DuplicateWeekButton } from "@/components/duplicate-week-button";
 import { cn } from "@/lib/cn";
@@ -14,7 +13,8 @@ import {
   toDayDate,
   weekDays,
 } from "@/lib/dates";
-import { getBoxBySlug, getWeekWorkouts } from "@/lib/workouts";
+import { coachPage } from "@/lib/guard";
+import { getWeekWorkouts } from "@/lib/workouts";
 import { BLOCK_KIND_LABELS, BLOCK_FORMAT_LABELS } from "@/lib/workout-schema";
 
 export default async function WeekPage({
@@ -27,17 +27,14 @@ export default async function WeekPage({
   const { slug } = await params;
   const { du } = await searchParams;
 
-  const box = await getBoxBySlug(slug);
-  if (!box) {
-    notFound();
-  }
+  const { box, user } = await coachPage(slug);
 
   const monday = mondayOf(du ? toDayDate(du) : new Date());
   const workouts = await getWeekWorkouts(box.id, monday);
   const today = toDayDate(new Date());
 
   return (
-    <BoxShell slug={slug} boxName={box.name} active="semaine">
+    <BoxShell slug={slug} boxName={box.name} userName={user.name} active="semaine">
       <main className="flex flex-1 flex-col gap-6 px-6 py-7">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>

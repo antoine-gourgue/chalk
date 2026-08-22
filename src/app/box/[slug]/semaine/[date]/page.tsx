@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { BoxShell } from "@/components/box-shell";
 import { WorkoutEditor } from "@/components/workout-editor";
 import { formatDayLong, mondayOf, toDayDate, toDayKey } from "@/lib/dates";
-import { getBoxBySlug, getWorkoutByDate, listMovements } from "@/lib/workouts";
+import { coachPage } from "@/lib/guard";
+import { getWorkoutByDate, listMovements } from "@/lib/workouts";
 import { emptyBlock, type BlockInput } from "@/lib/workout-schema";
 
 export default async function WorkoutPage({
@@ -16,10 +17,7 @@ export default async function WorkoutPage({
     notFound();
   }
 
-  const box = await getBoxBySlug(slug);
-  if (!box) {
-    notFound();
-  }
+  const { box, user } = await coachPage(slug);
 
   const day = toDayDate(date);
   const [workout, movements] = await Promise.all([getWorkoutByDate(box.id, day), listMovements()]);
@@ -43,7 +41,7 @@ export default async function WorkoutPage({
     : [emptyBlock()];
 
   return (
-    <BoxShell slug={slug} boxName={box.name} active="semaine">
+    <BoxShell slug={slug} boxName={box.name} userName={user.name} active="semaine">
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-5 px-6 py-7">
         <Link
           href={`/box/${slug}/semaine?du=${toDayKey(mondayOf(day))}`}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChalkMark } from "@/components/chalk-mark";
+import { SignOutButton } from "@/components/sign-out-button";
 import { cn } from "@/lib/cn";
 
 const TABS = [
@@ -14,11 +15,13 @@ const TABS = [
 export function BoxShell({
   slug,
   boxName,
+  userName,
   active,
   children,
 }: {
   slug: string;
   boxName: string;
+  userName: string;
   active: string;
   children: ReactNode;
 }) {
@@ -46,10 +49,13 @@ export function BoxShell({
           ))}
         </nav>
 
-        <span className="text-chalk-dim ml-auto flex items-center gap-2.5 text-sm">
-          {boxName}
+        <div className="text-chalk-dim ml-auto flex items-center gap-3 text-sm">
+          <span>
+            {boxName} · {userName}
+          </span>
+          <SignOutButton />
           <span className="brand-gradient h-6.5 w-6.5 rounded-full" aria-hidden />
-        </span>
+        </div>
       </header>
 
       {children}

@@ -16,6 +16,15 @@ npm run db:migrate
 npm run dev:all           # Next.js + passerelle temps réel
 ```
 
+## Comptes de démonstration
+
+Après `npm run db:seed`, mot de passe `chalk` pour tout le monde :
+
+| Compte               | Rôle   | Atterrit sur        |
+| -------------------- | ------ | ------------------- |
+| `lea@chalk.demo`     | Owner  | `/box/demo/semaine` |
+| `membre1@chalk.demo` | Membre | `/app/demo`         |
+
 ## Scripts
 
 | Script              | Rôle                                 |

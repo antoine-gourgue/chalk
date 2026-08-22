@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { AccessError, requireCoach } from "@/lib/access";
 import { prisma } from "@/lib/db";
 import { addDays, toDayDate, toDayKey } from "@/lib/dates";
 import { workoutSchema, type WorkoutInput } from "@/lib/workout-schema";
@@ -8,18 +9,20 @@ import { workoutSchema, type WorkoutInput } from "@/lib/workout-schema";
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Garde d'accès de la salle.
- *
- * L'authentification n'est pas encore branchée (lot dédié) : pour l'instant on
- * ne vérifie que l'existence de la salle. Toute écriture doit passer par ici,
- * pour qu'il n'y ait qu'un seul endroit à durcir quand Auth.js arrivera.
+ * Toute écriture passe par ici : la salle est résolue et le rôle vérifié en même
+ * temps, pour qu'aucun chemin d'écriture ne puisse oublier l'un des deux.
  */
 async function requireBox(slug: string) {
-  const box = await prisma.box.findUnique({ where: { slug } });
-  if (!box) {
-    throw new Error("Salle introuvable");
+  const access = await requireCoach(slug);
+  return access.box;
+}
+
+/** Transforme un refus d'accès en message affichable plutôt qu'en page d'erreur. */
+function toActionResult(error: unknown): ActionResult {
+  if (error instanceof AccessError) {
+    return { ok: false, error: error.message };
   }
-  return box;
+  throw error;
 }
 
 export async function saveWorkout(input: WorkoutInput): Promise<ActionResult> {
@@ -28,7 +31,12 @@ export async function saveWorkout(input: WorkoutInput): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Séance invalide" };
   }
   const data = parsed.data;
-  const box = await requireBox(data.boxSlug);
+  let box;
+  try {
+    box = await requireBox(data.boxSlug);
+  } catch (error) {
+    return toActionResult(error);
+  }
   const date = toDayDate(data.date);
 
   const emptyBlock = data.blocks.findIndex((block) => block.movements.length === 0);
@@ -92,7 +100,12 @@ export async function saveWorkout(input: WorkoutInput): Promise<ActionResult> {
 }
 
 export async function deleteWorkout(boxSlug: string, date: string): Promise<ActionResult> {
-  const box = await requireBox(boxSlug);
+  let box;
+  try {
+    box = await requireBox(boxSlug);
+  } catch (error) {
+    return toActionResult(error);
+  }
   await prisma.workout.deleteMany({ where: { boxId: box.id, date: toDayDate(date) } });
   revalidatePath(`/box/${boxSlug}/semaine`);
   return { ok: true };
@@ -103,7 +116,12 @@ export async function deleteWorkout(boxSlug: string, date: string): Promise<Acti
  * intacts : dupliquer ne doit jamais écraser un travail existant.
  */
 export async function duplicateWeek(boxSlug: string, sourceMonday: string): Promise<ActionResult> {
-  const box = await requireBox(boxSlug);
+  let box;
+  try {
+    box = await requireBox(boxSlug);
+  } catch (error) {
+    return toActionResult(error);
+  }
   const source = toDayDate(sourceMonday);
   const target = addDays(source, 7);
 
