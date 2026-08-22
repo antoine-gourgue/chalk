@@ -37,11 +37,20 @@ export function WallDisplay({
   attendees: number;
 }) {
   const router = useRouter();
-  const { timer, remaining, progress, finalCountdown, connected } = useBoxTimer(boxSlug);
+  const { timer, remaining, progress, finalCountdown, connected, scoreVersion } =
+    useBoxTimer(boxSlug);
 
-  /** Les scores arrivent par la base : on la relit régulièrement pendant la séance. */
+  /**
+   * Un score saisi depuis un téléphone déclenche un signal de la passerelle : le
+   * mur relit alors son classement immédiatement. Le rafraîchissement périodique
+   * ne sert plus que de filet, si le signal s'est perdu.
+   */
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 20_000);
+    router.refresh();
+  }, [router, scoreVersion]);
+
+  useEffect(() => {
+    const interval = setInterval(() => router.refresh(), 60_000);
     return () => clearInterval(interval);
   }, [router]);
 

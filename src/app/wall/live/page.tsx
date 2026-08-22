@@ -4,28 +4,13 @@ import { WallDisplay, type WallBlock, type WallScore } from "@/components/wall-d
 import { formatDayLong, toDayDate } from "@/lib/dates";
 import { prisma } from "@/lib/db";
 import { WALL_COOKIE } from "@/lib/pairing";
+import { compareResults, formatScore, type ScoreType } from "@/lib/score";
 import { getWorkoutByDate } from "@/lib/workouts";
 
 export const metadata = { title: "Le mur · Chalk" };
 
 /** L'écran de la salle se rafraîchit souvent : jamais de cache. */
 export const dynamic = "force-dynamic";
-
-function scoreLabel(result: {
-  scoreType: string;
-  value: number;
-  rounds: number | null;
-  reps: number | null;
-}): string {
-  if (result.scoreType === "ROUNDS_REPS") {
-    return `${result.rounds ?? 0} + ${String(result.reps ?? 0).padStart(2, "0")}`;
-  }
-  if (result.scoreType === "TIME") {
-    const total = Math.round(result.value);
-    return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-  }
-  return result.scoreType === "LOAD" ? `${result.value} kg` : `${result.value}`;
-}
 
 export default async function WallLivePage() {
   const token = (await cookies()).get(WALL_COOKIE)?.value;
@@ -75,16 +60,31 @@ export default async function WallLivePage() {
       : await prisma.result.findMany({
           where: { blockId: { in: blockIds } },
           include: { user: { select: { name: true } } },
-          orderBy: [{ rx: "desc" }, { value: "desc" }],
-          take: 8,
         });
 
-  const scores: WallScore[] = results.map((result) => ({
-    id: result.id,
-    name: result.user.name,
-    score: scoreLabel(result),
-    rx: result.rx,
-  }));
+  /**
+   * Le classement se fait en mémoire, pas en SQL : sur un « for time » c'est le
+   * plus petit score qui gagne, et la règle vit dans `src/lib/score.ts` plutôt
+   * que dupliquée dans une clause `orderBy`.
+   */
+  const scores: WallScore[] = results
+    .map((result) => ({
+      id: result.id,
+      name: result.user.name,
+      scoreType: result.scoreType as ScoreType,
+      value: result.value,
+      rounds: result.rounds,
+      reps: result.reps,
+      rx: result.rx,
+    }))
+    .sort(compareResults)
+    .slice(0, 8)
+    .map((result) => ({
+      id: result.id,
+      name: result.name,
+      score: formatScore(result),
+      rx: result.rx,
+    }));
 
   const attendees = await prisma.reservation.count({
     where: {

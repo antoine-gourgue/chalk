@@ -11,6 +11,8 @@ export const timerCommandSchema = z.discriminatedUnion("command", [
   z.object({ command: z.literal("pause"), boxSlug: z.string().min(1) }),
   z.object({ command: z.literal("resume"), boxSlug: z.string().min(1) }),
   z.object({ command: z.literal("reset"), boxSlug: z.string().min(1) }),
+  /** Un score vient d'être saisi : le mur doit relire le classement. */
+  z.object({ command: z.literal("scoreboard"), boxSlug: z.string().min(1) }),
 ]);
 
 export type TimerCommand = z.infer<typeof timerCommandSchema>;

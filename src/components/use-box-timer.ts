@@ -16,6 +16,8 @@ export type BoxTimer = {
   progress: number;
   finalCountdown: boolean;
   connected: boolean;
+  /** Incrémenté chaque fois qu'un score est saisi dans la salle. */
+  scoreVersion: number;
 };
 
 /** Dix images par seconde suffisent pour des secondes rondes et un anneau fluide. */
@@ -33,6 +35,7 @@ export function useBoxTimer(boxSlug: string): BoxTimer {
   const [timer, setTimer] = useState<TimerState | null>(null);
   const [offset, setOffset] = useState(0);
   const [connected, setConnected] = useState(false);
+  const [scoreVersion, setScoreVersion] = useState(0);
   const [clock, setClock] = useState(() => Date.now());
 
   useEffect(() => {
@@ -44,6 +47,7 @@ export function useBoxTimer(boxSlug: string): BoxTimer {
       socket.emit("box:join", boxSlug);
     });
     socket.on("disconnect", () => setConnected(false));
+    socket.on("scores:changed", () => setScoreVersion((version) => version + 1));
     socket.on("timer:state", (payload: { timer: TimerState | null; serverNow: number }) => {
       setOffset(clockOffset(payload.serverNow, Date.now()));
       setTimer(payload.timer);
@@ -68,5 +72,6 @@ export function useBoxTimer(boxSlug: string): BoxTimer {
     progress: timer === null ? 0 : progressRatio(timer, now),
     finalCountdown: timer !== null && isFinalCountdown(timer, now),
     connected,
+    scoreVersion,
   };
 }

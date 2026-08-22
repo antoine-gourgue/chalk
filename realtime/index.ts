@@ -70,6 +70,17 @@ const httpServer = createServer(async (request, response) => {
     }
 
     const command = parsed.data;
+
+    /**
+     * Le classement n'est pas un état détenu ici : la passerelle se contente de
+     * prévenir les écrans qu'il a changé, et chacun relit la base.
+     */
+    if (command.command === "scoreboard") {
+      io.to(command.boxSlug).emit("scores:changed");
+      json(response, 200, { ok: true });
+      return;
+    }
+
     const now = Date.now();
     const current = timers.get(command.boxSlug);
 
